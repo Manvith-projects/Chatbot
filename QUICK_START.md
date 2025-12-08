@@ -37,10 +37,14 @@ git push -u origin main
 In Render dashboard (Web Service → Environment):
 
 ```
-MONGODB_URI=mongodb+srv://228x1a42h3:Manvith9689@sv-hotel.rrjcucd.mongodb.net/?appName=SV-Hotel
+MONGODB_URI=your_mongodb_connection_string
 DB_NAME=sv_royal
-GEMINI_API_KEY=AIzaSyCAcACOUbKx23xGiLbFGuYJWxhwLANN88k
+GEMINI_API_KEY=your_new_gemini_api_key
 ```
+
+⚠️ **IMPORTANT**: Replace the values above with your own credentials:
+- Get your MongoDB URI from your MongoDB Atlas cluster
+- Get a new Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ## Step 5: Update Frontend API URL
 

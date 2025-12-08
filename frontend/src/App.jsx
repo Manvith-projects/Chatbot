@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 
-const API_BASE = 'https://sv-royal-backend.onrender.com';
+const API_BASE = "http://127.0.0.1:5000";
 
 // Hotel location
 const HOTEL_LOCATION = {
@@ -35,14 +35,29 @@ const ATTRACTIONS = {
   'Nagarjuna Sagar Dam': 'Nagarjuna Sagar Dam'
 };
 
+const initialMessages = [
+  {
+    type: 'bot',
+    text: 'Welcome to SV Royal Hotel! 👋 How can I assist you today?',
+    timestamp: new Date()
+  }
+];
+
 function App() {
-  const [messages, setMessages] = useState([
-    {
-      type: 'bot',
-      text: 'Welcome to SV Royal Hotel! 👋 How can I assist you today?',
-      timestamp: new Date()
+  const [messages, setMessages] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('svroyal_messages');
+      if (stored) {
+        return JSON.parse(stored).map(msg => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading messages from storage:', error);
     }
-  ]);
+    return initialMessages;
+  });
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(null);
@@ -51,6 +66,17 @@ function App() {
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
   const [showQuickActions, setShowQuickActions] = useState(false);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingData, setBookingData] = useState({
+    guest_name: '',
+    email: '',
+    phone: '',
+    check_in: '',
+    check_out: '',
+    guests: 1,
+    room_type: '',
+    notes: ''
+  });
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -60,6 +86,24 @@ function App() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('svroyal_messages', JSON.stringify(messages));
+    } catch (error) {
+      console.error('Error saving messages to storage:', error);
+    }
+  }, [messages]);
+
+  const restartConversation = () => {
+    if (window.confirm('Are you sure you want to restart the conversation? All messages will be cleared.')) {
+      setMessages(initialMessages);
+      sessionStorage.removeItem('svroyal_messages');
+      setInputValue('');
+      setShowQuickActions(false);
+      setShowFeedback(null);
+    }
+  };
 
   const detectLocations = (text, question) => {
     const locations = [];
@@ -264,9 +308,68 @@ function App() {
     setLeadPhone('');
   };
 
-  const sendQuickIntent = async (text) => {
+  const handleBookingSubmit = async () => {
+    const required = ['guest_name', 'phone', 'check_in', 'check_out', 'guests'];
+    const missing = required.filter(f => !bookingData[f]);
+    if (missing.length > 0) {
+      setMessages(prev => [...prev, {
+        type: 'bot',
+        text: `Please fill in: ${missing.join(', ')}`,
+        timestamp: new Date()
+      }]);
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE}/bookings`, {
+        ...bookingData,
+        source: 'chatbot'
+      });
+
+      const booking = response.data.booking;
+      const whatsappMsg = encodeURIComponent(
+        `✅ Booking Confirmed!\n\nBooking ID: ${booking.booking_id}\nGuest: ${booking.guest_name}\nPhone: ${booking.phone}\nCheck-in: ${booking.check_in}\nCheck-out: ${booking.check_out}\nGuests: ${booking.guests}\n\nWe look forward to hosting you at SV Royal Hotel!`
+      );
+
+      const emailSubject = encodeURIComponent('Booking Confirmation - SV Royal Hotel');
+      const emailBody = encodeURIComponent(
+        `Dear ${booking.guest_name},\n\nYour booking has been confirmed!\n\nBooking ID: ${booking.booking_id}\nCheck-in: ${booking.check_in}\nCheck-out: ${booking.check_out}\nGuests: ${booking.guests}\nRoom Type: ${booking.room_type || 'Standard'}\n\nContact us at +91 9563 776 776 for any queries.\n\nThank you for choosing SV Royal Hotel!`
+      );
+
+      setMessages(prev => [...prev, {
+        type: 'bot',
+        text: `🎉 Booking confirmed! ID: **${booking.booking_id}**\n\nWe've prepared confirmation messages for you:`,
+        timestamp: new Date()
+      }]);
+
+      // Open WhatsApp and email confirmation
+      window.open(`https://wa.me/${booking.phone}?text=${whatsappMsg}`, '_blank');
+      window.open(`mailto:${booking.email || 'svroyalguntur@gmail.com'}?subject=${emailSubject}&body=${emailBody}`, '_blank');
+
+      setBookingData({
+        guest_name: '',
+        email: '',
+        phone: '',
+        check_in: '',
+        check_out: '',
+        guests: 1,
+        room_type: '',
+        notes: ''
+      });
+      setShowBookingForm(false);
+    } catch (error) {
+      console.error('Booking error:', error);
+      setMessages(prev => [...prev, {
+        type: 'bot',
+        text: 'Sorry, booking failed. Please call us at +91 9563 776 776.',
+        timestamp: new Date(),
+        isError: true
+      }]);
+    }
+  };
+
+  const sendQuickIntent = (text) => {
     setInputValue(text);
-    await handleSendMessage({ preventDefault: () => {} }, text);
   };
 
   const mailtoAction = (subject, body) => {
@@ -283,8 +386,17 @@ function App() {
             <p>Chat Assistant</p>
           </div>
         </div>
-        <div className="contact-info">
-          <span>📞 +91 9563 776 776</span>
+        <div className="header-actions">
+          <button 
+            className="restart-btn" 
+            onClick={restartConversation}
+            title="Restart conversation"
+          >
+            🔄 Restart
+          </button>
+          <div className="contact-info">
+            <span>📞 +91 9563 776 776</span>
+          </div>
         </div>
       </div>
 
@@ -456,6 +568,12 @@ function App() {
 
         <div className="cta-row">
           <button
+            className="pill-btn booking-btn"
+            onClick={() => setShowBookingForm(true)}
+          >
+            📅 Book a room
+          </button>
+          <button
             className="pill-btn"
             onClick={() => mailtoAction('Waitlist request - SV Royal', 'Please waitlist me for the following dates and room type:')}
           >
@@ -513,6 +631,82 @@ function App() {
         </div>
       </div>
 
+      {showBookingForm && (
+        <div className="booking-modal">
+          <div className="booking-modal-content">
+            <div className="booking-header">
+              <h3>📅 Book Your Stay</h3>
+              <button
+                className="quick-close"
+                type="button"
+                onClick={() => setShowBookingForm(false)}
+                aria-label="Close booking form"
+              >
+                ×
+              </button>
+            </div>
+            <div className="booking-form">
+              <input
+                type="text"
+                placeholder="Guest Name *"
+                value={bookingData.guest_name}
+                onChange={(e) => setBookingData({...bookingData, guest_name: e.target.value})}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={bookingData.email}
+                onChange={(e) => setBookingData({...bookingData, email: e.target.value})}
+              />
+              <input
+                type="tel"
+                placeholder="Phone *"
+                value={bookingData.phone}
+                onChange={(e) => setBookingData({...bookingData, phone: e.target.value})}
+              />
+              <input
+                type="date"
+                placeholder="Check-in *"
+                value={bookingData.check_in}
+                onChange={(e) => setBookingData({...bookingData, check_in: e.target.value})}
+              />
+              <input
+                type="date"
+                placeholder="Check-out *"
+                value={bookingData.check_out}
+                onChange={(e) => setBookingData({...bookingData, check_out: e.target.value})}
+              />
+              <input
+                type="number"
+                placeholder="Guests *"
+                min="1"
+                value={bookingData.guests}
+                onChange={(e) => setBookingData({...bookingData, guests: e.target.value})}
+              />
+              <select
+                value={bookingData.room_type}
+                onChange={(e) => setBookingData({...bookingData, room_type: e.target.value})}
+              >
+                <option value="">Select Room Type</option>
+                <option value="Standard">Standard</option>
+                <option value="Deluxe">Deluxe</option>
+                <option value="Suite">Suite</option>
+              </select>
+              <textarea
+                placeholder="Special requests or notes"
+                value={bookingData.notes}
+                onChange={(e) => setBookingData({...bookingData, notes: e.target.value})}
+                rows="3"
+              />
+              <button className="submit-booking" onClick={handleBookingSubmit}>
+                Confirm Booking
+              </button>
+            </div>
+            <p className="consent-note">Booking confirmation will be sent via WhatsApp and Email.</p>
+          </div>
+        </div>
+      )}
+
       <form className="chat-input" onSubmit={handleSendMessage}>
         <input
           type="text"
@@ -544,7 +738,11 @@ function App() {
       </form>
 
       <div className="chat-footer">
-        <p>Powered by AI • Contact: svroyalguntur@gmail.com</p>
+        <p>
+          Powered by AI • Contact: svroyalguntur@gmail.com
+          {' • '}
+          <a href="/admin" style={{color: '#667eea', textDecoration: 'none'}}>Admin Dashboard</a>
+        </p>
       </div>
     </div>
   );

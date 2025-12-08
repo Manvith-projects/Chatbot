@@ -64,12 +64,14 @@ The system uses **Retrieval-Augmented Generation (RAG)** to ensure accurate, con
 - Responsive design for mobile and desktop
 - Suggested questions and quick intents for one-tap queries
 
-### 🚀 **Growth & Booking Accelerators (Free)**
+### 🚀 **Growth & Booking Accelerators**
+- **Direct Booking System**: Full booking form with instant confirmation via WhatsApp and Email
 - One-click CTAs: call, WhatsApp, email booking, directions, talk-to-human
 - Quick intents for rates/offers, family/weekend/business packages, corporate/long-stay deals
 - Free mailto flows: waitlist requests, reviews, referrals, group/event quotes
 - Lead capture (name/email/phone) with consent note; drafts email locally (no server storage)
 - Upsell prompts: airport pickup, late checkout/add-ons asked via intents
+- Booking management: Create, view, and update reservations with status tracking
 
 ### 🧳 **Concierge & Local Discovery**
 - Quick intents for cabs/tours/itinerary, restaurant/spa slot help, housekeeping/amenities
@@ -84,6 +86,13 @@ The system uses **Retrieval-Augmented Generation (RAG)** to ensure accurate, con
 - User tracking for personalized experiences
 - Feedback history and analytics
 - Average satisfaction scoring
+
+### 📊 **Analytics Dashboard**
+- Real-time booking metrics and status tracking
+- User engagement and satisfaction analytics
+- Recent feedback monitoring
+- Total users, bookings, and feedback counts
+- Average rating calculations across all interactions
 
 ---
 
@@ -440,6 +449,103 @@ Submit user feedback.
 }
 ```
 
+### **POST /bookings**
+
+Create a new booking.
+
+**Request:**
+```json
+{
+  "guest_name": "John Doe",
+  "email": "john@example.com",
+  "phone": "+919876543210",
+  "check_in": "2025-12-15",
+  "check_out": "2025-12-18",
+  "guests": 2,
+  "room_type": "Deluxe",
+  "notes": "Late check-in expected"
+}
+```
+
+**Response:**
+```json
+{
+  "booking": {
+    "booking_id": "674f5a3b2c1d8e0012345678",
+    "guest_name": "John Doe",
+    "status": "pending",
+    "created_at": "2025-12-08T10:30:00Z",
+    ...
+  }
+}
+```
+
+### **GET /bookings**
+
+List all bookings (optional filter by status).
+
+**Query Parameters:**
+- `status` (optional): Filter by booking status (pending, confirmed, cancelled)
+
+**Response:**
+```json
+{
+  "bookings": [
+    {
+      "booking_id": "674f5a3b2c1d8e0012345678",
+      "guest_name": "John Doe",
+      "status": "pending",
+      ...
+    }
+  ]
+}
+```
+
+### **PATCH /bookings/:booking_id**
+
+Update booking details.
+
+**Request:**
+```json
+{
+  "status": "confirmed",
+  "notes": "Room upgraded to suite"
+}
+```
+
+**Response:**
+```json
+{
+  "booking": {
+    "booking_id": "674f5a3b2c1d8e0012345678",
+    "status": "confirmed",
+    ...
+  }
+}
+```
+
+### **GET /analytics**
+
+Get chatbot and booking analytics.
+
+**Response:**
+```json
+{
+  "totals": {
+    "feedback": 150,
+    "users": 45,
+    "bookings": 12,
+    "avg_rating": 4.2
+  },
+  "recent_feedback": [...],
+  "booking_status": {
+    "pending": 3,
+    "confirmed": 8,
+    "cancelled": 1
+  }
+}
+```
+
 ---
 
 ## 🧪 Key Technologies Explained
@@ -510,12 +616,15 @@ This project is proprietary software for SV Royal Hotel.
 
 - [ ] Multi-language support (Telugu, Hindi)
 - [ ] Voice input/output
-- [ ] Booking integration
+- [x] ~~Booking integration~~ ✅ **Completed**
 - [ ] Live chat with staff
 - [ ] Image recognition for room queries
 - [ ] WhatsApp/Telegram bot integration
-- [ ] Analytics dashboard
+- [x] ~~Analytics dashboard~~ ✅ **Completed**
 - [ ] A/B testing for responses
+- [ ] Payment gateway integration
+- [ ] Room availability calendar
+- [ ] Email/SMS notifications via service
 
 ---
 
