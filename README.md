@@ -114,6 +114,7 @@ The system uses **Retrieval-Augmented Generation (RAG)** to ensure accurate, con
 - **Render/Vercel** - Deployment platforms
 - **Google Maps API** - Location services
 - **Gunicorn** - WSGI HTTP server
+- CPU-only PyTorch (`torch==2.9.1+cpu` via extra index) to avoid heavy GPU wheels and keep builds lean.
 
 ---
 
@@ -376,7 +377,7 @@ curl -X POST http://localhost:5000/feedback \
    - Go to [render.com](https://render.com)
    - Create Web Service from GitHub repo
    - Build: `pip install -r requirements.txt`
-   - Start: `gunicorn app:app`
+   - Start: `gunicorn app:app --bind 0.0.0.0:${PORT:-8000}`
    - Add environment variables
 
 3. **Deploy Frontend**
