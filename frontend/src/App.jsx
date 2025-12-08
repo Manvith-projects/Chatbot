@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://sv-royal-backend.onrender.com";
 
 // Hotel location
 const HOTEL_LOCATION = {

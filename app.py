@@ -247,5 +247,11 @@ def analytics():
     })
 
 
+@app.route("/", methods=["GET"])
+def root():
+    """Simple health/home endpoint for platform checks."""
+    return jsonify({"status": "ok"})
+
+
 if __name__ == "__main__":
     app.run(debug=True)
