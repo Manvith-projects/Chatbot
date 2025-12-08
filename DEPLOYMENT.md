@@ -47,7 +47,7 @@ This guide covers deploying the chatbot on popular cloud platforms.
    - Connect your GitHub repository
    - Fill in settings:
      - **Name**: sv-royal-frontend
-     - **Build Command**: `cd frontend && npm run build`
+     - **Build Command**: `cd frontend && npm install && npm run build`
      - **Publish Directory**: `frontend/dist`
 
 5. **Update Frontend API URL**

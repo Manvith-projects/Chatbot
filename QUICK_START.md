@@ -69,7 +69,7 @@ git push
 2. Connect same GitHub repository
 3. Fill in these details:
    - **Name**: `sv-royal-frontend`
-   - **Build Command**: `cd frontend && npm run build`
+   - **Build Command**: `cd frontend && npm install && npm run build`
    - **Publish Directory**: `frontend/dist`
 
 4. Click **Create Static Site**
