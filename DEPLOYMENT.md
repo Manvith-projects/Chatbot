@@ -153,8 +153,9 @@ Install Gunicorn for production:
 pip install gunicorn
 ```
 
-Update `requirements.txt`:
+Update `requirements.txt` (CPU-only PyTorch to keep builds small/fast):
 ```
+--extra-index-url https://download.pytorch.org/whl/cpu
 flask==3.1.2
 flask-cors==5.0.0
 pymongo==4.11.2
@@ -162,6 +163,7 @@ python-dotenv==1.2.1
 sentence-transformers==3.3.1
 google-generativeai==0.8.5
 gunicorn==21.2.0
+torch==2.3.1+cpu
 ```
 
 ---
