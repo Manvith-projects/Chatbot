@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Admin.css';
 
-const API_BASE = window.location.hostname === 'localhost' 
-  ? 'http://localhost:5000' 
-  : 'https://sv-royal-backend.onrender.com';
+const API_BASE ='https://sv-royal-backend.onrender.com';
 
 function Admin() {
   const [analytics, setAnalytics] = useState(null);

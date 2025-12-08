@@ -741,7 +741,7 @@ function App() {
         <p>
           Powered by AI • Contact: svroyalguntur@gmail.com
           {' • '}
-          <a href="/admin" style={{color: '#667eea', textDecoration: 'none'}}>Admin Dashboard</a>
+          <a href="#/admin" style={{color: '#667eea', textDecoration: 'none'}}>Admin Dashboard</a>
         </p>
       </div>
     </div>
