@@ -50,6 +50,7 @@ function App() {
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
+  const [showQuickActions, setShowQuickActions] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -416,10 +417,20 @@ function App() {
         </div>
       )}
 
-      <div className="quick-actions">
-        <div className="quick-head">
-          <h3>Grow with SV Royal</h3>
-          <p>Instant actions to book, contact, and discover.</p>
+      <div className={`quick-actions-panel ${showQuickActions ? 'open' : ''}`}>
+        <div className="quick-panel-header">
+          <div className="quick-head">
+            <h3>Grow with SV Royal</h3>
+            <p>Instant actions to book, contact, and discover.</p>
+          </div>
+          <button
+            className="quick-close"
+            type="button"
+            onClick={() => setShowQuickActions(false)}
+            aria-label="Close quick actions"
+          >
+            ×
+          </button>
         </div>
 
         <div className="quick-grid">
@@ -510,6 +521,20 @@ function App() {
           placeholder="Ask me anything about SV Royal Hotel..."
           disabled={isLoading}
         />
+        <button
+          className="quick-actions-toggle"
+          type="button"
+          onClick={() => setShowQuickActions((open) => !open)}
+          aria-label={showQuickActions ? 'Hide quick actions' : 'Open quick actions'}
+        >
+          {showQuickActions ? (
+            <span aria-hidden="true">×</span>
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          )}
+        </button>
         <button type="submit" disabled={isLoading || !inputValue.trim()}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
