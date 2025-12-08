@@ -47,6 +47,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(null);
   const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`);
+  const [leadName, setLeadName] = useState('');
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -89,20 +92,21 @@ function App() {
     return locations.length > 0 ? locations : null;
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
+  const handleSendMessage = async (e, overrideText = null) => {
+    if (e?.preventDefault) e.preventDefault();
     
-    if (!inputValue.trim() || isLoading) return;
+    const outbound = overrideText ?? inputValue;
+    if (!outbound.trim() || isLoading) return;
 
     const userMessage = {
       type: 'user',
-      text: inputValue,
+      text: outbound,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const questionText = inputValue;
-    setInputValue('');
+    const questionText = outbound;
+    if (!overrideText) setInputValue('');
     setIsLoading(true);
 
     try {
@@ -170,6 +174,103 @@ function App() {
     "What amenities do you offer?",
     "How can I make a reservation?"
   ];
+
+  const quickIntents = [
+    {
+      label: 'Show best rates',
+      text: 'What are the best rates and current offers?'
+    },
+    {
+      label: 'Family package',
+      text: 'Do you have any family or weekend packages?'
+    },
+    {
+      label: 'Airport pickup',
+      text: 'Can you arrange airport pickup and what is the cost?'
+    },
+    {
+      label: 'Corporate stay',
+      text: 'Do you offer corporate or long-stay discounts?'
+    },
+    {
+      label: 'Weekend deal',
+      text: 'Any weekend or time-based deals available now?'
+    },
+    {
+      label: 'Business package',
+      text: 'What business or meeting packages do you have?'
+    },
+    {
+      label: 'Spa / restaurant slots',
+      text: 'Help me book a restaurant table or spa slot.'
+    },
+    {
+      label: 'Cab / tour help',
+      text: 'Can you arrange cabs or local tours and share an itinerary?'
+    },
+    {
+      label: 'Housekeeping request',
+      text: 'I need housekeeping / amenities in my room.'
+    },
+    {
+      label: 'Talk to a human',
+      text: 'Connect me to a human agent right now.'
+    },
+    {
+      label: 'Share a review',
+      text: 'I want to leave a review for my stay.'
+    },
+    {
+      label: 'Refer a friend',
+      text: 'Can I get a referral code for friends or corporates?'
+    },
+    {
+      label: 'Group / wedding quote',
+      text: 'Need a quick quote for a group / wedding / event booking.'
+    },
+    {
+      label: 'Waitlist me',
+      text: 'If rooms are sold out, please waitlist me for my dates.'
+    }
+  ];
+
+  const quickLinks = [
+    { label: 'Call reception', href: 'tel:+919563776776' },
+    { label: 'WhatsApp us', href: 'https://wa.me/919563776776?text=Hi%20SV%20Royal%2C%20I%20want%20to%20book%20a%20room.' },
+    { label: 'Email booking', href: 'mailto:svroyalguntur@gmail.com?subject=Room%20booking%20enquiry&body=Hi%20SV%20Royal%2C%20I%20want%20to%20book%20a%20room.' },
+    { label: 'Get directions', href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(HOTEL_LOCATION.query)}` },
+    { label: 'Talk to human', href: 'tel:+919563776776' }
+  ];
+
+  const handleLeadSubmit = () => {
+    if (!leadName && !leadEmail && !leadPhone) return;
+
+    const subject = encodeURIComponent('New booking lead - SV Royal');
+    const body = encodeURIComponent(
+      `Name: ${leadName}\nEmail: ${leadEmail}\nPhone: ${leadPhone}\nInterest: Please share best available rates and offers.`
+    );
+
+    window.open(`mailto:svroyalguntur@gmail.com?subject=${subject}&body=${body}`, '_blank');
+
+    setMessages(prev => [...prev, {
+      type: 'bot',
+      text: `Thanks ${leadName || 'there'}! We have prepared an email draft to svroyalguntur@gmail.com. You can also call us at +91 9563 776 776 for instant confirmation.`,
+      timestamp: new Date()
+    }]);
+
+    setLeadName('');
+    setLeadEmail('');
+    setLeadPhone('');
+  };
+
+  const sendQuickIntent = async (text) => {
+    setInputValue(text);
+    await handleSendMessage({ preventDefault: () => {} }, text);
+  };
+
+  const mailtoAction = (subject, body) => {
+    window.open(`mailto:svroyalguntur@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+  };
 
   return (
     <div className="chat-container">
@@ -314,6 +415,92 @@ function App() {
           </div>
         </div>
       )}
+
+      <div className="quick-actions">
+        <div className="quick-head">
+          <h3>Grow with SV Royal</h3>
+          <p>Instant actions to book, contact, and discover.</p>
+        </div>
+
+        <div className="quick-grid">
+          {quickIntents.map((item, idx) => (
+            <button
+              key={idx}
+              className="pill-btn"
+              onClick={() => sendQuickIntent(item.text)}
+              disabled={isLoading}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="quick-links">
+          {quickLinks.map((link, idx) => (
+            <a key={idx} className="cta-link" href={link.href} target="_blank" rel="noopener noreferrer">
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <div className="cta-row">
+          <button
+            className="pill-btn"
+            onClick={() => mailtoAction('Waitlist request - SV Royal', 'Please waitlist me for the following dates and room type:')}
+          >
+            Waitlist me
+          </button>
+          <button
+            className="pill-btn"
+            onClick={() => mailtoAction('Review for my stay - SV Royal', 'I would like to share my review:')}
+          >
+            Share a review
+          </button>
+          <button
+            className="pill-btn"
+            onClick={() => mailtoAction('Refer a friend / corporate - SV Royal', 'Please share a referral code or corporate offer:')}
+          >
+            Refer a friend
+          </button>
+          <button
+            className="pill-btn"
+            onClick={() => mailtoAction('Group / wedding / event quote - SV Royal', 'I need a quick quote for group/event/wedding. Details:')}
+          >
+            Group / event quote
+          </button>
+        </div>
+
+        <div className="lead-box">
+          <div className="lead-text">
+            <h4>Request a call back</h4>
+            <p>Share your contact; we draft an email for you instantly.</p>
+          </div>
+          <div className="lead-form">
+            <input
+              type="text"
+              placeholder="Name"
+              value={leadName}
+              onChange={(e) => setLeadName(e.target.value)}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={leadEmail}
+              onChange={(e) => setLeadEmail(e.target.value)}
+            />
+            <input
+              type="tel"
+              placeholder="Phone"
+              value={leadPhone}
+              onChange={(e) => setLeadPhone(e.target.value)}
+            />
+            <button className="submit-lead" onClick={handleLeadSubmit}>
+              Send email draft
+            </button>
+          </div>
+          <p className="consent-note">By sharing your contact, you agree to be contacted for bookings and offers. No data is stored server-side—draft stays in your email client.</p>
+        </div>
+      </div>
 
       <form className="chat-input" onSubmit={handleSendMessage}>
         <input

@@ -388,6 +388,138 @@
   transform: translateY(-1px);
 }
 
+.quick-actions {
+  padding: 16px 24px;
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-head h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.quick-head p {
+  margin: 4px 0 0 0;
+  color: #666;
+  font-size: 13px;
+}
+
+.quick-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill-btn {
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid #ddd;
+  background: #f7f7ff;
+  color: #4a4a6a;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.pill-btn:hover:not(:disabled) {
+  background: #667eea;
+  color: #fff;
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cta-link {
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.lead-box {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fafbff;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.lead-text h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.lead-text p {
+  margin: 4px 0 0 0;
+  color: #555;
+  font-size: 13px;
+}
+
+.lead-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  flex: 1;
+}
+
+.lead-form input {
+  padding: 10px;
+  border: 1px solid #d6d6e7;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.submit-lead {
+  padding: 10px 12px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-lead:hover {
+  background: #429545;
+}
+
+.consent-note {
+  margin: 0;
+  font-size: 12px;
+  color: #777;
+}
+
 .chat-input {
   display: flex;
   padding: 16px 24px;
