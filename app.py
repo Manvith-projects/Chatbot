@@ -156,19 +156,25 @@ def feedback():
 
 
 def send_booking_confirmation_email(booking: Dict[str, Any]):
+    print("Attempting to send confirmation email...")
     sender_email = os.getenv("EMAIL_USER")
     sender_password = os.getenv("EMAIL_PASSWORD")
     smtp_server = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    smtp_port = int(os.getenv("EMAIL_PORT", 587))
+    try:
+        smtp_port = int(os.getenv("EMAIL_PORT", 587))
+    except ValueError:
+        smtp_port = 587
 
     if not sender_email or not sender_password:
-        print("Email credentials not set. Skipping email.")
+        print(f"Email credentials not set (User: {sender_email}). Skipping email.")
         return
 
     recipient_email = booking.get("email")
     if not recipient_email:
-        print("No recipient email provided. Skipping email.")
+        print("No recipient email provided in booking data. Skipping email.")
         return
+
+    print(f"Sending email to {recipient_email} from {sender_email} via {smtp_server}:{smtp_port}")
 
     subject = "Booking Confirmation - SV Royal Hotel"
     
@@ -198,15 +204,20 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
     msg.attach(MIMEText(body, 'plain'))
 
     try:
+        print("Connecting to SMTP server...")
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
+        print("Logging in...")
         server.login(sender_email, sender_password)
         text = msg.as_string()
+        print("Sending mail...")
         server.sendmail(sender_email, recipient_email, text)
         server.quit()
-        print(f"Email sent to {recipient_email}")
+        print(f"SUCCESS: Email sent to {recipient_email}")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"ERROR: Failed to send email: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 @app.route("/bookings", methods=["POST"])
