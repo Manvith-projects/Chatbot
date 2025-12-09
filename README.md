@@ -1,12 +1,14 @@
 # 🏨 SV Royal Hotel Chatbot
 
-An AI-powered conversational chatbot for SV Royal Hotel that provides instant answers about hotel amenities, services, nearby attractions, and booking information using RAG (Retrieval-Augmented Generation) technology.
+An AI-powered conversational chatbot and booking system for SV Royal Hotel that provides instant answers about hotel amenities, services, nearby attractions, and facilitates room bookings using RAG (Retrieval-Augmented Generation) technology.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![React](https://img.shields.io/badge/React-18.2-61dafb)
 ![Flask](https://img.shields.io/badge/Flask-3.1-black)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
 ![Gemini](https://img.shields.io/badge/Gemini-1.5--Flash-orange)
+
+### 🚀 [Live Demo](https://sv-royal.onrender.com/)
 
 ---
 
@@ -33,6 +35,7 @@ This chatbot is designed specifically for SV Royal Hotel in Guntur, Andhra Prade
 - Answering questions about hotel facilities, rooms, and amenities
 - Providing information about nearby tourist attractions
 - Offering directions with interactive Google Maps integration
+- **Facilitating direct room bookings** with instant email confirmation
 - Collecting user feedback to improve responses
 - Maintaining conversation context for personalized interactions
 
@@ -47,52 +50,38 @@ The system uses **Retrieval-Augmented Generation (RAG)** to ensure accurate, con
 - Vector similarity search for relevant information retrieval
 - Real-time response generation
 
+### 💎 **Luxury User Interface**
+- **Premium Design**: Gold & Dark Blue color scheme reflecting the hotel's luxury branding.
+- **Typography**: Elegant serif fonts (Playfair Display) for headings.
+- **Responsive**: Fully optimized for mobile and desktop devices.
+
+### 📅 **Direct Booking System**
+- **Integrated Booking Form**: Users can book rooms directly within the chat interface.
+- **Instant Confirmation**: Automated email sent to the guest with booking details immediately upon submission.
+- **Duplicate Prevention**: Smart UI prevents double-booking submissions.
+- **Validation**: Real-time validation for email, phone, and required fields.
+
+### 📊 **Admin Dashboard**
+- **Overview**: Real-time metrics on total bookings, active users, and feedback.
+- **Booking Management**: View, confirm, or cancel bookings.
+- **Analytics**: Visual breakdown of booking statuses (Pending, Confirmed, Cancelled).
+- **Feedback Monitoring**: Review recent guest feedback and ratings.
+
 ### 📍 **Location & Maps Integration**
 - Interactive Google Maps links for tourist attractions
 - Direct navigation to nearby places
 - Distance information from hotel
 
-### 📊 **Smart Feedback System**
-- Dynamic feedback questions based on user interaction history
-- Rating collection (thumbs up/down)
-- Detailed feedback capture for continuous improvement
-
 ### 💬 **Modern Chat Interface**
 - Real-time message streaming
 - Typing indicators
 - Markdown support for formatted responses
-- Responsive design for mobile and desktop
 - Suggested questions and quick intents for one-tap queries
 
-### 🚀 **Growth & Booking Accelerators**
-- **Direct Booking System**: Full booking form with instant confirmation via WhatsApp and Email
-- One-click CTAs: call, WhatsApp, email booking, directions, talk-to-human
-- Quick intents for rates/offers, family/weekend/business packages, corporate/long-stay deals
-- Free mailto flows: waitlist requests, reviews, referrals, group/event quotes
-- Lead capture (name/email/phone) with consent note; drafts email locally (no server storage)
-- Upsell prompts: airport pickup, late checkout/add-ons asked via intents
-- Booking management: Create, view, and update reservations with status tracking
-
-### 🧳 **Concierge & Local Discovery**
-- Quick intents for cabs/tours/itinerary, restaurant/spa slot help, housekeeping/amenities
-- Live map links to hotel and nearby attractions with Google Maps search URLs
-
-### 🛡️ **Trust & Compliance (Lightweight)**
-- Client-side-only lead drafts (mailto) to avoid storing PII on server
-- Explicit consent note near lead capture
-- Optional human handoff via call/WhatsApp/email
-
-### 🔒 **Session Management**
-- User tracking for personalized experiences
-- Feedback history and analytics
-- Average satisfaction scoring
-
-### 📊 **Analytics Dashboard**
-- Real-time booking metrics and status tracking
-- User engagement and satisfaction analytics
-- Recent feedback monitoring
-- Total users, bookings, and feedback counts
-- Average rating calculations across all interactions
+### 🚀 **Growth & Lead Generation**
+- **Lead Capture**: "Request a Callback" feature for users to leave contact details.
+- **Upsell Prompts**: Intelligent prompts for room upgrades or additional services.
+- **Quick Intents**: One-tap access to rates, offers, and packages.
 
 ---
 
@@ -106,6 +95,7 @@ The system uses **Retrieval-Augmented Generation (RAG)** to ensure accurate, con
 | ![MongoDB](https://img.shields.io/badge/-MongoDB-47A248?logo=mongodb&logoColor=white) **MongoDB Atlas** | Vector database for embeddings & feedback |
 | **Sentence Transformers** | Text embeddings (all-MiniLM-L6-v2) |
 | **Google Gemini AI** | LLM for response generation |
+| **SMTP** | Email service for booking confirmations |
 | **PyMongo** | MongoDB driver |
 | **Flask-CORS** | Cross-origin resource sharing |
 
@@ -116,14 +106,13 @@ The system uses **Retrieval-Augmented Generation (RAG)** to ensure accurate, con
 | ![Vite](https://img.shields.io/badge/-Vite-646CFF?logo=vite&logoColor=white) **Vite** | Build tool and dev server |
 | **Axios** | HTTP client for API calls |
 | **React Markdown** | Markdown rendering in chat |
-| **CSS3** | Custom styling with gradients |
+| **CSS3** | Custom luxury styling with variables |
 
 ### **Infrastructure**
 - **MongoDB Atlas** - Cloud database
-- **Render/Vercel** - Deployment platforms
+- **Render** - Deployment platform (Backend & Frontend)
 - **Google Maps API** - Location services
 - **Gunicorn** - WSGI HTTP server
-- CPU-only PyTorch (`torch==2.9.1+cpu` via extra index) to avoid heavy GPU wheels and keep builds lean.
 
 ---
 
@@ -140,8 +129,8 @@ The system uses **Retrieval-Augmented Generation (RAG)** to ensure accurate, con
 ┌────────────────▼────────────────────────────────────────────┐
 │                      Flask Backend                           │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │   API       │  │  RAG Engine  │  │  Feedback    │       │
-│  │  Endpoints  │  │              │  │  Manager     │       │
+│  │   API       │  │  RAG Engine  │  │  Email       │       │
+│  │  Endpoints  │  │              │  │  Service     │       │
 │  └─────────────┘  └──────────────┘  └──────────────┘       │
 └────────┬───────────────────┬──────────────────┬─────────────┘
          │                   │                  │
@@ -196,29 +185,28 @@ Send to Gemini AI
 Generate Answer
      │
      ▼
-Detect Locations
-     │
-     ▼
-Return Response + Map Links
+Return Response
      │
      ▼
 Display in Chat UI
 ```
 
-### **3. Feedback Loop**
+### **3. Booking Flow**
 
 ```
-User Rates Answer
+User Submits Booking Form
      │
      ▼
-Store Feedback in MongoDB
+Validate Data (Frontend & Backend)
      │
      ▼
-Update User Statistics
+Store in MongoDB (Status: Pending)
      │
      ▼
-Adjust Future Questions
-(Dynamic feedback strategy)
+Send Confirmation Email (Background Thread)
+     │
+     ▼
+Return Success Response to UI
 ```
 
 ---
@@ -248,8 +236,10 @@ SV Royal/
 │   ├── src/
 │   │   ├── main.jsx           # React entry point
 │   │   ├── App.jsx            # Main chat component
-│   │   ├── App.css            # Component styles
-│   │   └── index.css          # Global styles
+│   │   ├── Admin.jsx          # Admin dashboard component
+│   │   ├── App.css            # Chat styles (Luxury theme)
+│   │   ├── Admin.css          # Admin dashboard styles
+│   │   └── index.css          # Global styles & variables
 │   │
 │   └── dist/                  # Production build (generated)
 │
@@ -268,6 +258,7 @@ SV Royal/
 - Node.js 18+
 - MongoDB Atlas account
 - Google Gemini API key
+- Gmail account (for sending emails)
 
 ### **Backend Setup**
 
@@ -291,11 +282,17 @@ SV Royal/
 
 4. **Configure environment variables**
    
-   Create `.env` file:
+   Create `.env` file in the root directory:
    ```env
    MONGODB_URI=your_mongodb_atlas_connection_string
    DB_NAME=sv_royal
    GEMINI_API_KEY=your_gemini_api_key
+   
+   # Email Configuration
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASSWORD=your_app_password
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
    ```
 
 5. **Build knowledge base index**
@@ -343,32 +340,6 @@ SV Royal/
 2. Run: `python build_index.py`
 3. Restart backend
 
-### **Test API Endpoints**
-
-**Ask a Question:**
-```bash
-curl -X POST http://localhost:5000/ask \
-  -H "Content-Type: application/json" \
-  -d '{
-    "question": "What are your room rates?",
-    "user_id": "test_user_123"
-  }'
-```
-
-**Submit Feedback:**
-```bash
-curl -X POST http://localhost:5000/feedback \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "test_user_123",
-    "question": "What are your room rates?",
-    "answer": "Our rooms start from...",
-    "rating": 5,
-    "feedback_text": "Very helpful!",
-    "feedback_type": "csat_short"
-  }'
-```
-
 ---
 
 ## 🌐 Deployment
@@ -387,7 +358,7 @@ curl -X POST http://localhost:5000/feedback \
    - Create Web Service from GitHub repo
    - Build: `pip install -r requirements.txt`
    - Start: `gunicorn app:app --bind 0.0.0.0:${PORT:-8000}`
-   - Add environment variables
+   - **Environment Variables**: Add all variables from your `.env` file.
 
 3. **Deploy Frontend**
    - Create Static Site on Render
@@ -403,57 +374,13 @@ curl -X POST http://localhost:5000/feedback \
 ## 📚 API Documentation
 
 ### **POST /ask**
-
 Request a chatbot response.
-
-**Request:**
 ```json
-{
-  "question": "What amenities do you offer?",
-  "user_id": "user_12345"
-}
-```
-
-**Response:**
-```json
-{
-  "answer": "We offer swimming pool, gym, restaurant...",
-  "feedback_question": {
-    "text": "Was this answer helpful?",
-    "type": "csat_short"
-  },
-  "contexts": [...]
-}
-```
-
-### **POST /feedback**
-
-Submit user feedback.
-
-**Request:**
-```json
-{
-  "user_id": "user_12345",
-  "question": "What amenities do you offer?",
-  "answer": "We offer...",
-  "rating": 5,
-  "feedback_text": "Great response!",
-  "feedback_type": "csat_short"
-}
-```
-
-**Response:**
-```json
-{
-  "status": "ok"
-}
+{ "question": "What are your room rates?", "user_id": "user_123" }
 ```
 
 ### **POST /bookings**
-
-Create a new booking.
-
-**Request:**
+Create a new booking and send confirmation email.
 ```json
 {
   "guest_name": "John Doe",
@@ -463,113 +390,22 @@ Create a new booking.
   "check_out": "2025-12-18",
   "guests": 2,
   "room_type": "Deluxe",
-  "notes": "Late check-in expected"
-}
-```
-
-**Response:**
-```json
-{
-  "booking": {
-    "booking_id": "674f5a3b2c1d8e0012345678",
-    "guest_name": "John Doe",
-    "status": "pending",
-    "created_at": "2025-12-08T10:30:00Z",
-    ...
-  }
+  "notes": "Late check-in"
 }
 ```
 
 ### **GET /bookings**
-
-List all bookings (optional filter by status).
-
-**Query Parameters:**
-- `status` (optional): Filter by booking status (pending, confirmed, cancelled)
-
-**Response:**
-```json
-{
-  "bookings": [
-    {
-      "booking_id": "674f5a3b2c1d8e0012345678",
-      "guest_name": "John Doe",
-      "status": "pending",
-      ...
-    }
-  ]
-}
-```
+List all bookings (Admin).
+- Query Param: `status` (optional)
 
 ### **PATCH /bookings/:booking_id**
-
-Update booking details.
-
-**Request:**
+Update booking status (Admin).
 ```json
-{
-  "status": "confirmed",
-  "notes": "Room upgraded to suite"
-}
-```
-
-**Response:**
-```json
-{
-  "booking": {
-    "booking_id": "674f5a3b2c1d8e0012345678",
-    "status": "confirmed",
-    ...
-  }
-}
+{ "status": "confirmed" }
 ```
 
 ### **GET /analytics**
-
-Get chatbot and booking analytics.
-
-**Response:**
-```json
-{
-  "totals": {
-    "feedback": 150,
-    "users": 45,
-    "bookings": 12,
-    "avg_rating": 4.2
-  },
-  "recent_feedback": [...],
-  "booking_status": {
-    "pending": 3,
-    "confirmed": 8,
-    "cancelled": 1
-  }
-}
-```
-
----
-
-## 🧪 Key Technologies Explained
-
-### **RAG (Retrieval-Augmented Generation)**
-Combines information retrieval with AI generation:
-1. **Retrieval**: Find relevant chunks from knowledge base
-2. **Augmentation**: Add context to the prompt
-3. **Generation**: AI generates accurate, contextual response
-
-### **Vector Search**
-- Text converted to embeddings (768-dimensional vectors)
-- MongoDB Atlas vector search finds similar content
-- Cosine similarity measures relevance
-
-### **Sentence Transformers**
-- Model: `all-MiniLM-L6-v2`
-- Converts text to meaningful embeddings
-- Trained on semantic similarity tasks
-
-### **Google Gemini 1.5 Flash**
-- Fast, efficient LLM
-- Context window: 1M tokens
-- Multimodal capabilities
+Get dashboard metrics (Admin).
 
 ---
 
@@ -600,31 +436,6 @@ This project is proprietary software for SV Royal Hotel.
 
 **Developer**
 - GitHub: [@Manvith-projects](https://github.com/Manvith-projects)
-
----
-
-## 🙏 Acknowledgments
-
-- Google Gemini AI for LLM capabilities
-- Hugging Face for Sentence Transformers
-- MongoDB Atlas for vector database
-- React community for excellent documentation
-
----
-
-## 📊 Future Enhancements
-
-- [ ] Multi-language support (Telugu, Hindi)
-- [ ] Voice input/output
-- [x] ~~Booking integration~~ ✅ **Completed**
-- [ ] Live chat with staff
-- [ ] Image recognition for room queries
-- [ ] WhatsApp/Telegram bot integration
-- [x] ~~Analytics dashboard~~ ✅ **Completed**
-- [ ] A/B testing for responses
-- [ ] Payment gateway integration
-- [ ] Room availability calendar
-- [ ] Email/SMS notifications via service
 
 ---
 
