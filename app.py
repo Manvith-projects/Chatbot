@@ -7,6 +7,7 @@ from bson import ObjectId
 import os
 import random
 import smtplib
+import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional, Dict, Any
@@ -20,7 +21,9 @@ from rag_utils import generate_answer
 MONGODB_URI = os.getenv("MONGODB_URI")
 DB_NAME = os.getenv("DB_NAME", "sv_royal")
 
-mongo_client = MongoClient(MONGODB_URI)
+# connect=False ensures the client is not connected until the first operation,
+# which is fork-safe for Gunicorn workers.
+mongo_client = MongoClient(MONGODB_URI, connect=False)
 db = mongo_client[DB_NAME]
 feedback_col = db["feedback"]
 user_stats_col = db["user_stats"]
@@ -230,8 +233,9 @@ def create_booking():
     result = bookings_col.insert_one(booking)
     booking["_id"] = result.inserted_id
 
-    # Send confirmation email
-    send_booking_confirmation_email(booking)
+    # Send confirmation email in background thread
+    email_thread = threading.Thread(target=send_booking_confirmation_email, args=(booking,))
+    email_thread.start()
 
     return jsonify({"booking": serialize_booking(booking)}), 201
 
