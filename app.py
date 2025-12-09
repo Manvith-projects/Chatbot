@@ -206,10 +206,11 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
 
     try:
         print(f"Connecting to SMTP server {smtp_server}:{smtp_port}...")
+        # Force IPv4 by binding to 0.0.0.0 to avoid "Network is unreachable" on Render (IPv6 issues)
         if smtp_port == 465:
-            server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=20)
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=20, source_address=('0.0.0.0', 0))
         else:
-            server = smtplib.SMTP(smtp_server, smtp_port, timeout=20)
+            server = smtplib.SMTP(smtp_server, smtp_port, timeout=20, source_address=('0.0.0.0', 0))
             print("Starting TLS...")
             server.starttls()
             
