@@ -8,6 +8,7 @@ import os
 import random
 import smtplib
 import threading
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional, Dict, Any
@@ -156,18 +157,15 @@ def feedback():
 
 
 def send_booking_confirmation_email(booking: Dict[str, Any]):
-    print("Attempting to send confirmation email...")
-    sender_email = os.getenv("EMAIL_USER")
-    sender_password = os.getenv("EMAIL_PASSWORD")
-    primary_host = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-    try:
-        # Default to 465 for SSL
-        configured_port = int(os.getenv("EMAIL_PORT", 465))
-    except ValueError:
-        configured_port = 465
+    """Send booking confirmation using Resend HTTP API (preferred) and log failures."""
+    print("Attempting to send confirmation email via Resend...")
 
-    if not sender_email or not sender_password:
-        print(f"Email credentials not set (User: {sender_email}). Skipping email.")
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    resend_from = os.getenv("RESEND_FROM")  # e.g., "SV Royal <noreply@yourdomain.com>"
+    resend_reply_to = os.getenv("RESEND_REPLY_TO")  # optional
+
+    if not resend_api_key or not resend_from:
+        print("Resend credentials not set. Skipping email.")
         return
 
     recipient_email = booking.get("email")
@@ -175,10 +173,7 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
         print("No recipient email provided in booking data. Skipping email.")
         return
 
-    print(f"Sending email to {recipient_email} from {sender_email} via {primary_host}:{configured_port}")
-
     subject = "Booking Confirmation - SV Royal Hotel"
-    
     body = f"""
     Dear {booking.get('guest_name')},
 
@@ -198,82 +193,31 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
     SV Royal Hotel Team
     """
 
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = recipient_email
-    msg['Subject'] = subject
-    msg.attach(MIMEText(body, 'plain'))
+    payload = {
+        "from": resend_from,
+        "to": [recipient_email],
+        "subject": subject,
+        "text": body,
+    }
+    if resend_reply_to:
+        payload["reply_to"] = [resend_reply_to]
 
-    import socket
-    import ssl
-
-    def try_send_email(host: str, port: int):
-        """Send email over a specific host/port; return True on success."""
-        print(f"Trying to send email via {host}:{port}...")
-        server = None
-        try:
-            # Resolve IPv4 to avoid IPv6 issues on Render
-            addr_info = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
-            if not addr_info:
-                raise Exception("Could not resolve IPv4 address")
-            server_ip = addr_info[0][4][0]
-            print(f"Resolved {host} to {server_ip} (IPv4)")
-
-            if port == 465:
-                # Manual SSL connection to support IP connection + hostname verification
-                context = ssl.create_default_context()
-                sock = socket.create_connection((server_ip, port), timeout=30)
-                ssock = context.wrap_socket(sock, server_hostname=host)
-
-                server = smtplib.SMTP_SSL(timeout=30)
-                server.sock = ssock
-                server.file = ssock.makefile('rb')
-                server._host = host
-                (code, resp) = server.getreply()
-                if code != 220:
-                    server.close()
-                    raise Exception(f"Invalid greeting: {code} {resp}")
-            else:
-                server = smtplib.SMTP(timeout=30)
-                server.connect(server_ip, port)
-                server._host = host  # Important for starttls verification
-                print("Starting TLS...")
-                server.starttls()
-
-            print("Logging in...")
-            server.login(sender_email, sender_password)
-            print("Sending mail...")
-            server.sendmail(sender_email, recipient_email, msg.as_string())
-            server.quit()
-            print(f"SUCCESS: Email sent to {recipient_email} via {host}:{port}")
-            return True
-        except Exception as e:
-            print(f"ERROR on {host}:{port}: {e}")
-            try:
-                if server:
-                    server.quit()
-            except Exception:
-                pass
-            return False
-
-    # Host/port strategies: prefer SSL 465 first (often less blocked), then 587
-    hosts = [primary_host, "smtp.gmail.com", "smtp.googlemail.com"]
-    hosts = list(dict.fromkeys([h for h in hosts if h]))  # dedupe & skip blanks
-
-    ports = [465, 587]
-    # ensure configured port is first if provided
-    if configured_port in ports:
-        ports = [configured_port] + [p for p in ports if p != configured_port]
-    else:
-        ports = [configured_port] + ports
-    ports = list(dict.fromkeys(ports))
-
-    for host in hosts:
-        for port in ports:
-            if try_send_email(host, port):
-                return
-
-    print("ALL ATTEMPTS FAILED. Could not send email.")
+    try:
+        resp = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=20,
+        )
+        if resp.status_code >= 200 and resp.status_code < 300:
+            print(f"SUCCESS: Email sent to {recipient_email} via Resend")
+        else:
+            print(f"ERROR: Resend returned {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"ERROR: Failed to send via Resend: {e}")
 
 
 @app.route("/bookings", methods=["POST"])
