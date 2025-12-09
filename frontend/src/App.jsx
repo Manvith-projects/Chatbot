@@ -67,6 +67,7 @@ function App() {
   const [leadPhone, setLeadPhone] = useState('');
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookingErrors, setBookingErrors] = useState({});
   const [bookingData, setBookingData] = useState({
     guest_name: '',
     email: '',
@@ -153,6 +154,46 @@ function App() {
     const questionText = outbound;
     if (!overrideText) setInputValue('');
     setIsLoading(true);
+
+    // Check if user is asking to book
+    const lowerText = questionText.toLowerCase();
+    const bookingKeywords = ['book', 'reservation', 'reserve', 'check-in', 'check in'];
+    const roomKeywords = ['room', 'suite', 'accommodation', 'stay', 'night'];
+    const exclusionKeywords = ['housekeeping', 'amenities', 'clean', 'service', 'review', 'feedback', 'waitlist', 'cab', 'taxi', 'tour', 'spa', 'restaurant', 'food', 'directions', 'location'];
+
+    const hasBookingKeyword = bookingKeywords.some(k => lowerText.includes(k));
+    const hasRoomKeyword = roomKeywords.some(k => lowerText.includes(k));
+    const hasExclusion = exclusionKeywords.some(k => lowerText.includes(k));
+
+    let isBookingRequest = false;
+
+    if (hasBookingKeyword) {
+      // If explicitly mentioning room/stay, it's likely a room booking even if exclusions are present (e.g. "book room with amenities")
+      if (hasRoomKeyword) {
+        isBookingRequest = true;
+      } else {
+        // If saying "book" but not "room", check if it's "book cab" etc.
+        if (!hasExclusion) {
+          isBookingRequest = true;
+        }
+      }
+    } else if (hasRoomKeyword) {
+      // If mentioning "room" without "book", only show if no service keywords (e.g. "need a room" vs "clean room")
+      if (!hasExclusion) {
+        isBookingRequest = true;
+      }
+    }
+
+    if (isBookingRequest) {
+      setShowBookingForm(true);
+      setMessages(prev => [...prev, {
+        type: 'bot',
+        text: 'I can help you with that. Please fill out the booking form below.',
+        timestamp: new Date()
+      }]);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await axios.post(`${API_BASE}/ask`, {
@@ -310,15 +351,27 @@ function App() {
 
   const handleBookingSubmit = async () => {
     const required = ['guest_name', 'phone', 'check_in', 'check_out', 'guests'];
-    const missing = required.filter(f => !bookingData[f]);
-    if (missing.length > 0) {
-      setMessages(prev => [...prev, {
-        type: 'bot',
-        text: `Please fill in: ${missing.join(', ')}`,
-        timestamp: new Date()
-      }]);
+    const errors = {};
+    
+    required.forEach(field => {
+      if (!bookingData[field]) {
+        const fieldLabels = {
+          guest_name: 'Guest Name',
+          phone: 'Phone Number',
+          check_in: 'Check-in Date',
+          check_out: 'Check-out Date',
+          guests: 'Number of Guests'
+        };
+        errors[field] = `${fieldLabels[field]} is required`;
+      }
+    });
+    
+    if (Object.keys(errors).length > 0) {
+      setBookingErrors(errors);
       return;
     }
+    
+    setBookingErrors({});
 
     try {
       const response = await axios.post(`${API_BASE}/bookings`, {
@@ -370,6 +423,7 @@ function App() {
 
   const sendQuickIntent = (text) => {
     setInputValue(text);
+    setShowQuickActions(false);
   };
 
   const mailtoAction = (subject, body) => {
@@ -646,58 +700,92 @@ function App() {
               </button>
             </div>
             <div className="booking-form">
-              <input
-                type="text"
-                placeholder="Guest Name *"
-                value={bookingData.guest_name}
-                onChange={(e) => setBookingData({...bookingData, guest_name: e.target.value})}
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={bookingData.email}
-                onChange={(e) => setBookingData({...bookingData, email: e.target.value})}
-              />
-              <input
-                type="tel"
-                placeholder="Phone *"
-                value={bookingData.phone}
-                onChange={(e) => setBookingData({...bookingData, phone: e.target.value})}
-              />
-              <input
-                type="date"
-                placeholder="Check-in *"
-                value={bookingData.check_in}
-                onChange={(e) => setBookingData({...bookingData, check_in: e.target.value})}
-              />
-              <input
-                type="date"
-                placeholder="Check-out *"
-                value={bookingData.check_out}
-                onChange={(e) => setBookingData({...bookingData, check_out: e.target.value})}
-              />
-              <input
-                type="number"
-                placeholder="Guests *"
-                min="1"
-                value={bookingData.guests}
-                onChange={(e) => setBookingData({...bookingData, guests: e.target.value})}
-              />
-              <select
-                value={bookingData.room_type}
-                onChange={(e) => setBookingData({...bookingData, room_type: e.target.value})}
-              >
-                <option value="">Select Room Type</option>
-                <option value="Standard">Standard</option>
-                <option value="Deluxe">Deluxe</option>
-                <option value="Suite">Suite</option>
-              </select>
-              <textarea
-                placeholder="Special requests or notes"
-                value={bookingData.notes}
-                onChange={(e) => setBookingData({...bookingData, notes: e.target.value})}
-                rows="3"
-              />
+              <div className="form-group">
+                <input
+                  type="text"
+                  placeholder="Guest Name *"
+                  value={bookingData.guest_name}
+                  onChange={(e) => setBookingData({...bookingData, guest_name: e.target.value})}
+                  className={bookingErrors.guest_name ? 'error' : ''}
+                />
+                {bookingErrors.guest_name && <span className="error-msg">{bookingErrors.guest_name}</span>}
+              </div>
+              
+              <div className="form-group">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={bookingData.email}
+                  onChange={(e) => setBookingData({...bookingData, email: e.target.value})}
+                />
+              </div>
+
+              <div className="form-group">
+                <input
+                  type="tel"
+                  placeholder="Phone *"
+                  value={bookingData.phone}
+                  onChange={(e) => setBookingData({...bookingData, phone: e.target.value})}
+                  className={bookingErrors.phone ? 'error' : ''}
+                />
+                {bookingErrors.phone && <span className="error-msg">{bookingErrors.phone}</span>}
+              </div>
+
+              <div className="form-group">
+                <input
+                  type="date"
+                  placeholder="Check-in *"
+                  value={bookingData.check_in}
+                  onChange={(e) => setBookingData({...bookingData, check_in: e.target.value})}
+                  className={bookingErrors.check_in ? 'error' : ''}
+                />
+                {bookingErrors.check_in && <span className="error-msg">{bookingErrors.check_in}</span>}
+              </div>
+
+              <div className="form-group">
+                <input
+                  type="date"
+                  placeholder="Check-out *"
+                  value={bookingData.check_out}
+                  onChange={(e) => setBookingData({...bookingData, check_out: e.target.value})}
+                  className={bookingErrors.check_out ? 'error' : ''}
+                />
+                {bookingErrors.check_out && <span className="error-msg">{bookingErrors.check_out}</span>}
+              </div>
+
+              <div className="form-group">
+                <input
+                  type="number"
+                  placeholder="Guests *"
+                  min="1"
+                  value={bookingData.guests}
+                  onChange={(e) => setBookingData({...bookingData, guests: e.target.value})}
+                  className={bookingErrors.guests ? 'error' : ''}
+                />
+                {bookingErrors.guests && <span className="error-msg">{bookingErrors.guests}</span>}
+              </div>
+
+              <div className="form-group">
+                <select
+                  value={bookingData.room_type}
+                  onChange={(e) => setBookingData({...bookingData, room_type: e.target.value})}
+                >
+                  <option value="">Select Room Type</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Deluxe">Deluxe</option>
+                  <option value="Suite">Suite</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <textarea
+                  placeholder="Special requests or notes"
+                  value={bookingData.notes}
+                  onChange={(e) => setBookingData({...bookingData, notes: e.target.value})}
+                  rows="3"
+                />
+              </div>
+
               <button className="submit-booking" onClick={handleBookingSubmit}>
                 Confirm Booking
               </button>

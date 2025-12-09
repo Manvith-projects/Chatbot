@@ -1,90 +1,103 @@
 .chat-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   height: 90vh;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  background: var(--bg-cream);
+  border-radius: 8px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  border: 1px solid rgba(197, 160, 89, 0.3);
 }
 
 .chat-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px 24px;
+  background: var(--primary-dark);
+  color: var(--primary-gold);
+  padding: 24px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 2px solid var(--primary-gold);
 }
 
 .hotel-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .logo-icon {
-  font-size: 32px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 8px 12px;
-  border-radius: 12px;
+  font-size: 28px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: var(--primary-gold);
 }
 
 .hotel-logo h1 {
-  font-size: 24px;
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 600;
   margin: 0;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
 }
 
 .hotel-logo p {
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: 12px;
+  opacity: 0.8;
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--primary-gold);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
 }
 
 .restart-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
+  background: transparent;
+  color: var(--primary-gold);
+  border: 1px solid var(--primary-gold);
+  padding: 8px 16px;
+  border-radius: 2px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .restart-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
-.restart-btn:active {
-  transform: scale(0.98);
+  background: var(--primary-gold);
+  color: var(--primary-dark);
+  transform: translateY(-1px);
 }
 
 .contact-info {
   font-size: 14px;
-  opacity: 0.95;
+  color: var(--text-light);
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
-  background: #f8f9fa;
+  padding: 32px;
+  background: var(--bg-cream);
+  background-image: radial-gradient(#c5a059 0.5px, transparent 0.5px);
+  background-size: 20px 20px;
+  background-opacity: 0.1;
 }
 
 .message {
@@ -109,33 +122,37 @@
 }
 
 .message-content {
-  max-width: 70%;
-  padding: 12px 16px;
-  border-radius: 16px;
+  max-width: 75%;
+  padding: 16px 24px;
+  border-radius: 2px;
   position: relative;
+  font-size: 15px;
+  letter-spacing: 0.3px;
 }
 
 .message.bot .message-content {
   background: white;
-  border: 1px solid #e0e0e0;
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(197, 160, 89, 0.2);
+  border-left: 3px solid var(--primary-gold);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  color: var(--text-dark);
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-bottom-right-radius: 4px;
+  background: var(--primary-dark);
+  color: var(--primary-gold);
+  border: 1px solid var(--primary-dark);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .message-content p {
   margin: 0 0 8px 0;
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
 .markdown-content {
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .markdown-content p {
@@ -147,42 +164,47 @@
 }
 
 .markdown-content strong {
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: var(--primary-dark);
+  font-family: var(--font-heading);
 }
 
 .markdown-content ul,
 .markdown-content ol {
-  margin: 8px 0;
+  margin: 12px 0;
   padding-left: 20px;
 }
 
 .markdown-content li {
-  margin: 4px 0;
-  line-height: 1.5;
+  margin: 6px 0;
+  line-height: 1.6;
 }
 
 .markdown-content code {
   background: #f5f5f5;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 2px;
   font-family: 'Courier New', monospace;
   font-size: 0.9em;
+  color: var(--primary-dark);
 }
 
 .markdown-content pre {
   background: #f5f5f5;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 16px;
+  border-radius: 4px;
   overflow-x: auto;
-  margin: 8px 0;
+  margin: 12px 0;
+  border: 1px solid #e0e0e0;
 }
 
 .markdown-content h1,
 .markdown-content h2,
 .markdown-content h3 {
-  margin: 12px 0 8px 0;
+  margin: 16px 0 12px 0;
   font-weight: 600;
+  font-family: var(--font-heading);
+  color: var(--primary-dark);
 }
 
 .markdown-content h1 {
@@ -310,44 +332,34 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
-  margin: 6px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: 12px 16px;
+  margin: 8px 0;
+  background: var(--primary-dark);
+  color: var(--primary-gold);
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 2px;
   transition: all 0.2s;
   font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .map-link:hover {
   transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.map-icon {
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.map-name {
-  flex: 1;
-  font-weight: 500;
-}
-
-.map-arrow {
-  font-size: 16px;
-  font-weight: bold;
-  flex-shrink: 0;
+  background: var(--primary-gold);
+  color: var(--primary-dark);
 }
 
 .directions-link {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  margin-top: 8px;
+  background: white;
+  color: var(--primary-dark);
+  border: 1px solid var(--primary-dark);
+  margin-top: 12px;
 }
 
 .directions-link:hover {
-  box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);
+  background: var(--primary-dark);
+  color: var(--primary-gold);
 }
 
 .typing-indicator {
@@ -403,37 +415,45 @@
 }
 
 .suggestion-btn {
-  padding: 8px 12px;
-  background: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 16px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid var(--primary-gold);
+  border-radius: 2px;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .suggestion-btn:hover {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
+  background: var(--primary-gold);
+  color: var(--primary-dark);
+  border-color: var(--primary-gold);
   transform: translateY(-1px);
 }
 
 .quick-actions-toggle {
   padding: 10px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  border-radius: 2px;
+  border: 1px solid var(--primary-gold);
+  background: white;
+  color: var(--primary-dark);
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  height: 48px;
-  width: 48px;
+  height: 50px;
+  width: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.quick-actions-toggle:hover {
+  background: var(--primary-gold);
+  color: var(--primary-dark);
 }
 
 .quick-actions-toggle:hover {
@@ -683,75 +703,81 @@
 .booking-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .booking-form input,
 .booking-form select,
 .booking-form textarea {
-  padding: 12px;
+  padding: 14px;
   border: 1px solid #d6d6e7;
-  border-radius: 10px;
+  border-radius: 2px;
   font-family: inherit;
   font-size: 14px;
   transition: border-color 0.2s;
+  background: white;
 }
 
 .booking-form input:focus,
 .booking-form select:focus,
 .booking-form textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--primary-gold);
 }
 
 .submit-booking {
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: 16px;
+  background: var(--primary-gold);
+  color: var(--primary-dark);
   border: none;
-  border-radius: 10px;
+  border-radius: 2px;
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .submit-booking:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3);
+  background: var(--primary-gold-hover);
 }
 
 .chat-input {
   display: flex;
-  padding: 16px 24px;
+  padding: 20px 32px;
   background: white;
   border-top: 1px solid #e0e0e0;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
 }
 
 .chat-input input {
   flex: 1;
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 24px;
-  font-size: 14px;
+  padding: 14px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 2px;
+  font-size: 15px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.2s;
+  background: var(--bg-cream);
 }
 
 .chat-input input:focus {
-  border-color: #667eea;
+  border-color: var(--primary-gold);
+  background: white;
 }
 
 .chat-input button {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  width: 50px;
+  height: 50px;
+  background: var(--primary-dark);
+  color: var(--primary-gold);
   border: none;
-  border-radius: 50%;
+  border-radius: 2px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -761,6 +787,8 @@
 
 .chat-input button:hover:not(:disabled) {
   transform: scale(1.05);
+  background: var(--primary-gold);
+  color: var(--primary-dark);
 }
 
 .chat-input button:disabled {
@@ -769,12 +797,14 @@
 }
 
 .chat-footer {
-  padding: 12px 24px;
+  padding: 16px 32px;
   text-align: center;
   font-size: 12px;
   color: #999;
-  background: #f8f9fa;
+  background: var(--bg-cream);
   border-top: 1px solid #e0e0e0;
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
 }
 
 /* Scrollbar styling */
@@ -826,3 +856,25 @@
     max-height: 65vh;
   }
 }
+
+/* Booking Form Validation Styles */
+.booking-form input.error {
+  border-color: #ff4444;
+  background-color: #fff0f0;
+}
+
+.error-msg {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  display: block;
+  text-align: left;
+  padding-left: 4px;
+}
+
+.form-group {
+  margin-bottom: 10px;
+  width: 100%;
+}
+

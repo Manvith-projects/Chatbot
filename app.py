@@ -6,6 +6,9 @@ from pymongo import MongoClient
 from bson import ObjectId
 import os
 import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from typing import Optional, Dict, Any
 
 # Load .env file from the same directory as this script
@@ -149,6 +152,60 @@ def feedback():
     return jsonify({"status": "ok"})
 
 
+def send_booking_confirmation_email(booking: Dict[str, Any]):
+    sender_email = os.getenv("EMAIL_USER")
+    sender_password = os.getenv("EMAIL_PASSWORD")
+    smtp_server = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+    smtp_port = int(os.getenv("EMAIL_PORT", 587))
+
+    if not sender_email or not sender_password:
+        print("Email credentials not set. Skipping email.")
+        return
+
+    recipient_email = booking.get("email")
+    if not recipient_email:
+        print("No recipient email provided. Skipping email.")
+        return
+
+    subject = "Booking Confirmation - SV Royal Hotel"
+    
+    body = f"""
+    Dear {booking.get('guest_name')},
+
+    Thank you for choosing SV Royal Hotel. Your booking has been received.
+
+    Booking Details:
+    ----------------
+    Booking ID: {str(booking.get('_id'))}
+    Check-in: {booking.get('check_in')}
+    Check-out: {booking.get('check_out')}
+    Guests: {booking.get('guests')}
+    Room Type: {booking.get('room_type')}
+    
+    We look forward to hosting you!
+
+    Best regards,
+    SV Royal Hotel Team
+    """
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        text = msg.as_string()
+        server.sendmail(sender_email, recipient_email, text)
+        server.quit()
+        print(f"Email sent to {recipient_email}")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+
+
 @app.route("/bookings", methods=["POST"])
 def create_booking():
     payload = request.get_json(force=True)
@@ -172,6 +229,9 @@ def create_booking():
 
     result = bookings_col.insert_one(booking)
     booking["_id"] = result.inserted_id
+
+    # Send confirmation email
+    send_booking_confirmation_email(booking)
 
     return jsonify({"booking": serialize_booking(booking)}), 201
 
