@@ -159,12 +159,12 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
     print("Attempting to send confirmation email...")
     sender_email = os.getenv("EMAIL_USER")
     sender_password = os.getenv("EMAIL_PASSWORD")
-    smtp_server = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+    primary_host = os.getenv("EMAIL_HOST", "smtp.gmail.com")
     try:
         # Default to 465 for SSL
-        smtp_port = int(os.getenv("EMAIL_PORT", 465))
+        configured_port = int(os.getenv("EMAIL_PORT", 465))
     except ValueError:
-        smtp_port = 465
+        configured_port = 465
 
     if not sender_email or not sender_password:
         print(f"Email credentials not set (User: {sender_email}). Skipping email.")
@@ -175,7 +175,7 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
         print("No recipient email provided in booking data. Skipping email.")
         return
 
-    print(f"Sending email to {recipient_email} from {sender_email} via {smtp_server}:{smtp_port}")
+    print(f"Sending email to {recipient_email} from {sender_email} via {primary_host}:{configured_port}")
 
     subject = "Booking Confirmation - SV Royal Hotel"
     
@@ -204,41 +204,76 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
 
-    try:
-        print(f"Connecting to SMTP server {smtp_server}:{smtp_port}...")
-        
-        # Resolve IPv4 address for smtp.gmail.com to avoid IPv6 issues on Render
-        import socket
-        try:
-            # Get the IPv4 address explicitly
-            server_ip = socket.gethostbyname(smtp_server)
-            print(f"Resolved {smtp_server} to {server_ip} (IPv4)")
-        except Exception as e:
-            print(f"DNS resolution failed: {e}, falling back to hostname")
-            server_ip = smtp_server
+    import socket
+    import ssl
 
-        if smtp_port == 465:
-            server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=20)
-        else:
-            server = smtplib.SMTP(timeout=20)
-            server.connect(server_ip, smtp_port)
-            # Restore the hostname for TLS verification
-            server._host = smtp_server
-            
-            print("Starting TLS...")
-            server.starttls()
-            
-        print("Logging in...")
-        server.login(sender_email, sender_password)
-        text = msg.as_string()
-        print("Sending mail...")
-        server.sendmail(sender_email, recipient_email, text)
-        server.quit()
-        print(f"SUCCESS: Email sent to {recipient_email}")
-    except Exception as e:
-        print(f"ERROR: Failed to send email: {e}")
-        import traceback
-        traceback.print_exc()
+    def try_send_email(host: str, port: int):
+        """Send email over a specific host/port; return True on success."""
+        print(f"Trying to send email via {host}:{port}...")
+        server = None
+        try:
+            # Resolve IPv4 to avoid IPv6 issues on Render
+            addr_info = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
+            if not addr_info:
+                raise Exception("Could not resolve IPv4 address")
+            server_ip = addr_info[0][4][0]
+            print(f"Resolved {host} to {server_ip} (IPv4)")
+
+            if port == 465:
+                # Manual SSL connection to support IP connection + hostname verification
+                context = ssl.create_default_context()
+                sock = socket.create_connection((server_ip, port), timeout=30)
+                ssock = context.wrap_socket(sock, server_hostname=host)
+
+                server = smtplib.SMTP_SSL(timeout=30)
+                server.sock = ssock
+                server.file = ssock.makefile('rb')
+                server._host = host
+                (code, resp) = server.getreply()
+                if code != 220:
+                    server.close()
+                    raise Exception(f"Invalid greeting: {code} {resp}")
+            else:
+                server = smtplib.SMTP(timeout=30)
+                server.connect(server_ip, port)
+                server._host = host  # Important for starttls verification
+                print("Starting TLS...")
+                server.starttls()
+
+            print("Logging in...")
+            server.login(sender_email, sender_password)
+            print("Sending mail...")
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+            server.quit()
+            print(f"SUCCESS: Email sent to {recipient_email} via {host}:{port}")
+            return True
+        except Exception as e:
+            print(f"ERROR on {host}:{port}: {e}")
+            try:
+                if server:
+                    server.quit()
+            except Exception:
+                pass
+            return False
+
+    # Host/port strategies: prefer SSL 465 first (often less blocked), then 587
+    hosts = [primary_host, "smtp.gmail.com", "smtp.googlemail.com"]
+    hosts = list(dict.fromkeys([h for h in hosts if h]))  # dedupe & skip blanks
+
+    ports = [465, 587]
+    # ensure configured port is first if provided
+    if configured_port in ports:
+        ports = [configured_port] + [p for p in ports if p != configured_port]
+    else:
+        ports = [configured_port] + ports
+    ports = list(dict.fromkeys(ports))
+
+    for host in hosts:
+        for port in ports:
+            if try_send_email(host, port):
+                return
+
+    print("ALL ATTEMPTS FAILED. Could not send email.")
 
 
 @app.route("/bookings", methods=["POST"])
