@@ -206,11 +206,25 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
 
     try:
         print(f"Connecting to SMTP server {smtp_server}:{smtp_port}...")
-        # Force IPv4 by binding to 0.0.0.0 to avoid "Network is unreachable" on Render (IPv6 issues)
+        
+        # Resolve IPv4 address for smtp.gmail.com to avoid IPv6 issues on Render
+        import socket
+        try:
+            # Get the IPv4 address explicitly
+            server_ip = socket.gethostbyname(smtp_server)
+            print(f"Resolved {smtp_server} to {server_ip} (IPv4)")
+        except Exception as e:
+            print(f"DNS resolution failed: {e}, falling back to hostname")
+            server_ip = smtp_server
+
         if smtp_port == 465:
-            server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=20, source_address=('0.0.0.0', 0))
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=20)
         else:
-            server = smtplib.SMTP(smtp_server, smtp_port, timeout=20, source_address=('0.0.0.0', 0))
+            server = smtplib.SMTP(timeout=20)
+            server.connect(server_ip, smtp_port)
+            # Restore the hostname for TLS verification
+            server._host = smtp_server
+            
             print("Starting TLS...")
             server.starttls()
             
