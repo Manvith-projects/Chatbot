@@ -32,8 +32,21 @@ body {
   border-right: 1px solid var(--primary-gold);
 }
 
+.sidebar.mobile {
+  position: fixed;
+  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: 200;
+}
+
 .sidebar.closed {
   width: 80px;
+}
+
+.sidebar.mobile.closed {
+  width: 0;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -69,6 +82,13 @@ body {
 .sidebar.closed .sidebar-header h2,
 .sidebar.closed .sidebar-nav {
   display: none;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 150;
 }
 
 .sidebar-nav {

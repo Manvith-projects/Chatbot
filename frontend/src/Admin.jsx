@@ -9,6 +9,20 @@ function Admin() {
   const [bookings, setBookings] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [processingBookingId, setProcessingBookingId] = useState(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 900;
+      setIsMobile(mobile);
+      if (mobile) setSidebarOpen(false);
+      else setSidebarOpen(true);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -28,18 +42,21 @@ function Admin() {
   };
 
   const updateBookingStatus = async (bookingId, newStatus) => {
+    setProcessingBookingId(bookingId);
     try {
       await axios.patch(`${API_BASE}/bookings/${bookingId}`, { status: newStatus });
       fetchData();
     } catch (error) {
       console.error('Error updating booking:', error);
+    } finally {
+      setProcessingBookingId(null);
     }
   };
 
   return (
     <div className="admin-dashboard">
       {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+      <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'} ${isMobile ? 'mobile' : ''}`}>
         <div className="sidebar-header">
           <h2>🏨 SV Royal</h2>
           <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -62,7 +79,7 @@ function Admin() {
           </div>
         </nav>
       </aside>
-
+      {isMobile && sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
       {/* Main Content */}
       <main className="main-content">
         {/* Top Bar */}
@@ -230,24 +247,27 @@ function Admin() {
                         <>
                           <button
                             className="btn btn-success"
+                            disabled={processingBookingId === booking.booking_id}
                             onClick={() => updateBookingStatus(booking.booking_id, 'confirmed')}
                           >
-                            ✓ Confirm
+                            {processingBookingId === booking.booking_id ? 'Processing...' : '✓ Confirm'}
                           </button>
                           <button
                             className="btn btn-danger"
+                            disabled={processingBookingId === booking.booking_id}
                             onClick={() => updateBookingStatus(booking.booking_id, 'cancelled')}
                           >
-                            ✗ Cancel
+                            {processingBookingId === booking.booking_id ? 'Processing...' : '✗ Cancel'}
                           </button>
                         </>
                       )}
                       {booking.status === 'confirmed' && (
                         <button
                           className="btn btn-danger"
+                          disabled={processingBookingId === booking.booking_id}
                           onClick={() => updateBookingStatus(booking.booking_id, 'cancelled')}
                         >
-                          ✗ Cancel Booking
+                          {processingBookingId === booking.booking_id ? 'Processing...' : '✗ Cancel Booking'}
                         </button>
                       )}
                     </div>
