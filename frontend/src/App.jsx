@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://sv-royal-backend.onrender.com";
 
 // Hotel location
 const HOTEL_LOCATION = {
@@ -60,6 +60,7 @@ function App() {
   });
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isBookingLoading, setIsBookingLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(null);
   const [userId] = useState(() => `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`);
   const [leadName, setLeadName] = useState('');
@@ -370,6 +371,7 @@ function App() {
     }
     
     setBookingErrors({});
+    setIsBookingLoading(true);
 
     try {
       const response = await axios.post(`${API_BASE}/bookings`, {
@@ -404,6 +406,8 @@ function App() {
         timestamp: new Date(),
         isError: true
       }]);
+    } finally {
+      setIsBookingLoading(false);
     }
   };
 
@@ -768,8 +772,12 @@ function App() {
                 />
               </div>
 
-              <button className="submit-booking" onClick={handleBookingSubmit}>
-                Confirm Booking
+              <button 
+                className="submit-booking" 
+                onClick={handleBookingSubmit}
+                disabled={isBookingLoading}
+              >
+                {isBookingLoading ? 'Processing...' : 'Confirm Booking'}
               </button>
             </div>
             <p className="consent-note">Booking confirmation will be sent via Email.</p>
