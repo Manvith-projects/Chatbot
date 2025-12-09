@@ -207,9 +207,9 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
     try:
         print(f"Connecting to SMTP server {smtp_server}:{smtp_port}...")
         if smtp_port == 465:
-            server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10)
         else:
-            server = smtplib.SMTP(smtp_server, smtp_port)
+            server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
             server.starttls()
             
         print("Logging in...")
@@ -334,4 +334,4 @@ def root():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0",port=5000,debug=True)
