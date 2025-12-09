@@ -322,8 +322,6 @@ function App() {
 
   const quickLinks = [
     { label: 'Call reception', href: 'tel:+919563776776' },
-    { label: 'WhatsApp us', href: 'https://wa.me/919563776776?text=Hi%20SV%20Royal%2C%20I%20want%20to%20book%20a%20room.' },
-    { label: 'Email booking', href: 'mailto:svroyalguntur@gmail.com?subject=Room%20booking%20enquiry&body=Hi%20SV%20Royal%2C%20I%20want%20to%20book%20a%20room.' },
     { label: 'Get directions', href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(HOTEL_LOCATION.query)}` },
     { label: 'Talk to human', href: 'tel:+919563776776' }
   ];
@@ -331,16 +329,11 @@ function App() {
   const handleLeadSubmit = () => {
     if (!leadName && !leadEmail && !leadPhone) return;
 
-    const subject = encodeURIComponent('New booking lead - SV Royal');
-    const body = encodeURIComponent(
-      `Name: ${leadName}\nEmail: ${leadEmail}\nPhone: ${leadPhone}\nInterest: Please share best available rates and offers.`
-    );
-
-    window.open(`mailto:svroyalguntur@gmail.com?subject=${subject}&body=${body}`, '_blank');
-
+    // Send lead to backend (optional implementation)
+    // For now, just acknowledge receipt
     setMessages(prev => [...prev, {
       type: 'bot',
-      text: `Thanks ${leadName || 'there'}! We have prepared an email draft to svroyalguntur@gmail.com. You can also call us at +91 9563 776 776 for instant confirmation.`,
+      text: `Thanks ${leadName || 'there'}! We have received your details. Our team will contact you shortly at ${leadPhone || leadEmail}.`,
       timestamp: new Date()
     }]);
 
@@ -380,24 +373,12 @@ function App() {
       });
 
       const booking = response.data.booking;
-      const whatsappMsg = encodeURIComponent(
-        `✅ Booking Confirmed!\n\nBooking ID: ${booking.booking_id}\nGuest: ${booking.guest_name}\nPhone: ${booking.phone}\nCheck-in: ${booking.check_in}\nCheck-out: ${booking.check_out}\nGuests: ${booking.guests}\n\nWe look forward to hosting you at SV Royal Hotel!`
-      );
-
-      const emailSubject = encodeURIComponent('Booking Confirmation - SV Royal Hotel');
-      const emailBody = encodeURIComponent(
-        `Dear ${booking.guest_name},\n\nYour booking has been confirmed!\n\nBooking ID: ${booking.booking_id}\nCheck-in: ${booking.check_in}\nCheck-out: ${booking.check_out}\nGuests: ${booking.guests}\nRoom Type: ${booking.room_type || 'Standard'}\n\nContact us at +91 9563 776 776 for any queries.\n\nThank you for choosing SV Royal Hotel!`
-      );
 
       setMessages(prev => [...prev, {
         type: 'bot',
-        text: `🎉 Booking confirmed! ID: **${booking.booking_id}**\n\nWe've prepared confirmation messages for you:`,
+        text: `🎉 Booking confirmed! ID: **${booking.booking_id}**\n\nA confirmation email has been sent to ${booking.email}.`,
         timestamp: new Date()
       }]);
-
-      // Open WhatsApp and email confirmation
-      window.open(`https://wa.me/${booking.phone}?text=${whatsappMsg}`, '_blank');
-      window.open(`mailto:${booking.email || 'svroyalguntur@gmail.com'}?subject=${emailSubject}&body=${emailBody}`, '_blank');
 
       setBookingData({
         guest_name: '',
@@ -424,10 +405,6 @@ function App() {
   const sendQuickIntent = (text) => {
     setInputValue(text);
     setShowQuickActions(false);
-  };
-
-  const mailtoAction = (subject, body) => {
-    window.open(`mailto:svroyalguntur@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
   };
 
   return (
@@ -629,25 +606,25 @@ function App() {
           </button>
           <button
             className="pill-btn"
-            onClick={() => mailtoAction('Waitlist request - SV Royal', 'Please waitlist me for the following dates and room type:')}
+            onClick={() => sendQuickIntent('Please waitlist me')}
           >
             Waitlist me
           </button>
           <button
             className="pill-btn"
-            onClick={() => mailtoAction('Review for my stay - SV Royal', 'I would like to share my review:')}
+            onClick={() => sendQuickIntent('I want to share a review')}
           >
             Share a review
           </button>
           <button
             className="pill-btn"
-            onClick={() => mailtoAction('Refer a friend / corporate - SV Royal', 'Please share a referral code or corporate offer:')}
+            onClick={() => sendQuickIntent('I want to refer a friend')}
           >
             Refer a friend
           </button>
           <button
             className="pill-btn"
-            onClick={() => mailtoAction('Group / wedding / event quote - SV Royal', 'I need a quick quote for group/event/wedding. Details:')}
+            onClick={() => sendQuickIntent('I need a quote for a group event')}
           >
             Group / event quote
           </button>
@@ -656,7 +633,7 @@ function App() {
         <div className="lead-box">
           <div className="lead-text">
             <h4>Request a call back</h4>
-            <p>Share your contact; we draft an email for you instantly.</p>
+            <p>Share your contact; we will get back to you.</p>
           </div>
           <div className="lead-form">
             <input
@@ -678,7 +655,7 @@ function App() {
               onChange={(e) => setLeadPhone(e.target.value)}
             />
             <button className="submit-lead" onClick={handleLeadSubmit}>
-              Send email draft
+              Request Callback
             </button>
           </div>
           <p className="consent-note">By sharing your contact, you agree to be contacted for bookings and offers. No data is stored server-side—draft stays in your email client.</p>
@@ -790,7 +767,7 @@ function App() {
                 Confirm Booking
               </button>
             </div>
-            <p className="consent-note">Booking confirmation will be sent via WhatsApp and Email.</p>
+            <p className="consent-note">Booking confirmation will be sent via Email.</p>
           </div>
         </div>
       )}

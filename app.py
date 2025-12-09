@@ -161,9 +161,10 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
     sender_password = os.getenv("EMAIL_PASSWORD")
     smtp_server = os.getenv("EMAIL_HOST", "smtp.gmail.com")
     try:
-        smtp_port = int(os.getenv("EMAIL_PORT", 587))
+        # Default to 465 for SSL
+        smtp_port = int(os.getenv("EMAIL_PORT", 465))
     except ValueError:
-        smtp_port = 587
+        smtp_port = 465
 
     if not sender_email or not sender_password:
         print(f"Email credentials not set (User: {sender_email}). Skipping email.")
@@ -204,9 +205,13 @@ def send_booking_confirmation_email(booking: Dict[str, Any]):
     msg.attach(MIMEText(body, 'plain'))
 
     try:
-        print("Connecting to SMTP server...")
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
+        print(f"Connecting to SMTP server {smtp_server}:{smtp_port}...")
+        if smtp_port == 465:
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        else:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            
         print("Logging in...")
         server.login(sender_email, sender_password)
         text = msg.as_string()
