@@ -3,7 +3,7 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import './App.css';
 
-const API_BASE = "https://sv-royal-backend.onrender.com";
+const API_BASE = "http://localhost:5000";
 
 // Hotel location
 const HOTEL_LOCATION = {
@@ -343,7 +343,7 @@ function App() {
   };
 
   const handleBookingSubmit = async () => {
-    const required = ['guest_name', 'phone', 'check_in', 'check_out', 'guests'];
+    const required = ['guest_name', 'phone', 'check_in', 'check_out', 'guests', 'email'];
     const errors = {};
     
     required.forEach(field => {
@@ -353,11 +353,16 @@ function App() {
           phone: 'Phone Number',
           check_in: 'Check-in Date',
           check_out: 'Check-out Date',
-          guests: 'Number of Guests'
+          guests: 'Number of Guests',
+          email: 'Email Address'
         };
         errors[field] = `${fieldLabels[field]} is required`;
       }
     });
+
+    if (bookingData.email && !/\S+@\S+\.\S+/.test(bookingData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
     
     if (Object.keys(errors).length > 0) {
       setBookingErrors(errors);
